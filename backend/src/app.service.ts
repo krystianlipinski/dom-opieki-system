@@ -21,4 +21,36 @@ export class AppService {
     const result = await this.pool.query(query, values);
     return result.rows[0];
   }
+
+// Funkcja do pobierania wszystkich czynności
+async getAllActivities() {
+  const result = await this.pool.query('SELECT * FROM activities ORDER BY id');
+  return result.rows;
+}
+
+// Funkcja do tworzenia nowej czynności
+async createActivity(activityData: { name: string }) {
+  const { name } = activityData;
+  const query = 'INSERT INTO activities (name) VALUES ($1) RETURNING *';
+  const values = [name];
+
+  const result = await this.pool.query(query, values);
+  return result.rows[0];
+}
+async deletePatient(id: number) {
+  // Zapytanie SQL do usunięcia pacjenta o konkretnym id
+  const query = 'DELETE FROM patients WHERE id = $1';
+  await this.pool.query(query, [id]);
+  // Przy usuwaniu nie musimy nic zwracać
+}
+
+async updatePatient(id: number, patientData: { firstName: string; lastName: string; priority: string }) {
+  const { firstName, lastName, priority } = patientData;
+  const query = 'UPDATE patients SET first_name = $1, last_name = $2, priority = $3 WHERE id = $4 RETURNING *';
+  const values = [firstName, lastName, priority, id];
+
+  const result = await this.pool.query(query, values);
+  return result.rows[0];
+}
+
 }

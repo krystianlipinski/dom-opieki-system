@@ -1,4 +1,4 @@
-import { deletePatient, Patient } from '../services/patientService';
+import { deletePatient, Patient } from '../services/apiService';
 
 interface PatientListProps {
   patients: Patient[];
