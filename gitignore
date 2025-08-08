@@ -1,0 +1,19 @@
+# Plik z sekretami
+.env
+
+# Foldery z zależnościami Node.js
+**/node_modules
+
+# Pliki logów
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Foldery produkcyjne
+**/dist
+**/build
+
+# Pliki systemowe
+.DS_Store
+Thumbs.db

@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:14-alpine
+    container_name: domopieki_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: domopieki_backend
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    volumes:
+      # Montujemy kod, ale izolujemy node_modules
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules
+    env_file:
+      - .env
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: domopieki_frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      # Montujemy kod, ale izolujemy node_modules
+      - ./frontend:/app
+      - /app/node_modules
+    env_file:
+      - .env
+
+volumes:
+  postgres_data:
