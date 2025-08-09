@@ -1,62 +1,65 @@
-// To mówi Prismie, jakiego klienta ma wygenerować.
+// This tells Prisma how to generate the client for your application.
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  // This line is crucial for Docker compatibility on Alpine Linux
+  binaryTargets = ["native", "linux-musl"] 
 }
 
-// To mówi Prismie, jak połączyć się z bazą danych.
-// Czyta zmienną DATABASE_URL z pliku .env.
+// This tells Prisma how to connect to your database.
+// It reads the DATABASE_URL variable from your .env file.
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// === DEFINICJE NASZYCH MODELI (TABEL) ===
+// === MODEL DEFINITIONS (your database tables) ===
 
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   password  String
-  firstName String? // Znak ? oznacza, że pole jest opcjonalne
+  firstName String? // The '?' means this field is optional
   lastName  String?
   role      Role     @default(staff_care)
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 
-  // Relacje
+  // Relations
   createdFamilyAccess PatientFamilyAccess[]
-  tasksCompleted      Task[]
+  tasksCompleted      Task[]                @relation("CompletedTasks")
   inventoryMovements  InventoryMovement[]
 }
 
 model Patient {
-  id           Int      @id @default(autoincrement())
+  id           Int        @id @default(autoincrement())
   firstName    String
   lastName     String
   birthDate    DateTime?
-  carePriority Priority @default(medium)
-  createdAt    DateTime @default(now())
+  carePriority Priority   @default(medium)
+  createdAt    DateTime   @default(now())
 
-  // Relacje
+  // Relations
   familyAccess PatientFamilyAccess[]
   tasks        Task[]
 }
 
+// This is a many-to-many join table between Patient and User (for family access)
 model PatientFamilyAccess {
   patientId Int
   userId    Int
 
-  patient Patient @relation(fields: [patientId], references: [id])
-  user    User    @relation(fields: [userId], references: [id])
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@id([patientId, userId]) // Klucz główny złożony
+  @@id([patientId, userId]) // Composite primary key
 }
 
 model CatalogActivity {
-  id          Int     @id @default(autoincrement())
-  name        String  @unique
-  defaultCost Decimal @default(0)
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  defaultCost Decimal  @default(0)
 
-  // Relacje
+  // Relations
   tasks Task[]
 }
 
@@ -64,60 +67,61 @@ model CatalogProduct {
   id      Int     @id @default(autoincrement())
   name    String  @unique
   barcode String? @unique
-  unit    String // np. 'szt', 'ml', 'op.'
+  unit    String // e.g., 'szt', 'ml', 'op.'
 
-  // Relacje
+  // Relations
   inventory          Inventory?
   inventoryMovements InventoryMovement[]
 }
 
+// One-to-one relation with CatalogProduct
 model Inventory {
-  id                  Int @id @default(autoincrement())
-  quantity            Int @default(0)
-  lowStockThreshold   Int @default(0)
-  
-  // Relacje
-  product   CatalogProduct @relation(fields: [productId], references: [id])
+  id                 Int @id @default(autoincrement())
+  quantity           Int @default(0)
+  lowStockThreshold  Int @default(0)
+
+  // Relations
+  product   CatalogProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int            @unique
 }
 
 model InventoryMovement {
-  id              Int               @id @default(autoincrement())
-  quantityChange  Int
-  costPerUnit     Decimal?
-  type            MovementType
-  timestamp       DateTime          @default(now())
+  id             Int          @id @default(autoincrement())
+  quantityChange Int
+  costPerUnit    Decimal?
+  type           MovementType
+  timestamp      DateTime     @default(now())
 
-  // Relacje
-  product   CatalogProduct @relation(fields: [productId], references: [id])
+  // Relations
+  product   CatalogProduct @relation(fields: [productId], references: [id], onDelete: Restrict)
   productId Int
-  user      User           @relation(fields: [userId], references: [id])
+  user      User           @relation(fields: [userId], references: [id], onDelete: Restrict)
   userId    Int
-  task      Task?          @relation(fields: [taskId], references: [id])
+  task      Task?          @relation(fields: [taskId], references: [id], onDelete: SetNull)
   taskId    Int?
 }
 
 model Task {
-  id             Int       @id @default(autoincrement())
-  type           TaskType
-  status         TaskStatus @default(pending)
-  dueDate        DateTime
-  completedAt    DateTime?
-  completionNotes String?
-  cost            Decimal?
+  id                Int              @id @default(autoincrement())
+  type              TaskType
+  status            TaskStatus       @default(pending)
+  dueDate           DateTime
+  completedAt       DateTime?
+  completionNotes   String?
+  cost              Decimal?
 
-  // Relacje
-  patient    Patient?         @relation(fields: [patientId], references: [id])
-  patientId  Int?
-  activity   CatalogActivity? @relation(fields: [activityId], references: [id])
-  activityId Int?
-  completedBy User?           @relation(fields: [completedByUserId], references: [id])
+  // Relations
+  patient           Patient?         @relation(fields: [patientId], references: [id], onDelete: SetNull)
+  patientId         Int?
+  activity          CatalogActivity? @relation(fields: [activityId], references: [id], onDelete: SetNull)
+  activityId        Int?
+  completedBy       User?            @relation("CompletedTasks", fields: [completedByUserId], references: [id], onDelete: SetNull)
   completedByUserId Int?
-  
+
   inventoryMovements InventoryMovement[]
 }
 
-// === ENUMY (zdefiniowane typy) ===
+// === ENUMS (pre-defined types for specific fields) ===
 
 enum Role {
   admin
@@ -134,14 +138,14 @@ enum Priority {
 }
 
 enum MovementType {
-  income    // przyjęcie
-  outcome   // rozchód
-  correction // korekta
+  income
+  outcome
+  correction
 }
 
 enum TaskType {
-  scheduled // zaplanowane
-  ad_hoc    // doraźne
+  scheduled
+  ad_hoc
 }
 
 enum TaskStatus {

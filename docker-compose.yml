@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:14-alpine
@@ -21,6 +19,9 @@ services:
     container_name: domopieki_backend
     depends_on:
       - db
+    dns: # <-- DODANA SEKCJA DNS
+      - 8.8.8.8
+      - 1.1.1.1
     ports:
       - "3000:3000"
     volumes:
@@ -29,6 +30,7 @@ services:
       - /usr/src/app/node_modules
     env_file:
       - .env
+    # command: tail -f /dev/null
 
   frontend:
     build:

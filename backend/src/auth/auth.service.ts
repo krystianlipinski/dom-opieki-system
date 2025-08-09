@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from '../users/users.service'; // Serwis do komunikacji z bazą użytkowników
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
@@ -10,24 +10,17 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  // Ta funkcja sprawdza, czy hasło jest poprawne
-  async validateUser(username: string, pass: string): Promise<any> {
-    const user = await this.usersService.findOneByEmail(username);
+  async validateUser(email: string, pass: string): Promise<any> {
+    const user = await this.usersService.findOneByEmail(email);
     if (user && (await bcrypt.compare(pass, user.password))) {
-      // Jeśli użytkownik istnieje I hasło się zgadza...
-      const { password, ...result } = user; // ...zwróć użytkownika bez hasła
+      const { password, ...result } = user;
       return result;
     }
-    return null; // W przeciwnym razie zwróć null
+    return null;
   }
 
-  // Ta funkcja generuje "bilet" (token) dla zalogowanego użytkownika
   async login(user: any) {
-    const payload = {
-      username: user.email,
-      sub: user.id,
-      role: user.role, // Dodajemy rolę do "biletu"
-    };
+    const payload = { email: user.email, sub: user.id, role: user.role };
     return {
       access_token: this.jwtService.sign(payload),
     };

@@ -1,52 +1,38 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Patient, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PatientsService {
   constructor(private prisma: PrismaService) {}
 
-  // Pobierz jednego pacjenta po ID
-  async getPatientById(
-    patientWhereUniqueInput: Prisma.PatientWhereUniqueInput,
-  ): Promise<Patient | null> {
-    const patient = await this.prisma.patient.findUnique({
-      where: patientWhereUniqueInput,
-    });
-    if (!patient) {
-      throw new NotFoundException(`Patient not found.`);
-    }
-    return patient;
+  // Tworzenie pacjenta
+  create(data: Prisma.PatientCreateInput) {
+    return this.prisma.patient.create({ data });
   }
 
-  // Pobierz wszystkich pacjentów
-  async getAllPatients(): Promise<Patient[]> {
+  // Pobieranie wszystkich pacjentów
+  findAll() {
     return this.prisma.patient.findMany();
   }
 
-  // Stwórz nowego pacjenta
-  async createPatient(data: Prisma.PatientCreateInput): Promise<Patient> {
-    return this.prisma.patient.create({
-      data,
-    });
+  // Pobieranie jednego pacjenta po ID
+  findOne(id: number) {
+    return this.prisma.patient.findUnique({ where: { id } });
   }
 
-  // Zaktualizuj dane pacjenta
-  async updatePatient(params: {
-    where: Prisma.PatientWhereUniqueInput;
-    data: Prisma.PatientUpdateInput;
-  }): Promise<Patient> {
-    const { where, data } = params;
+  // Aktualizacja pacjenta po ID
+  update(id: number, data: Prisma.PatientUpdateInput) {
     return this.prisma.patient.update({
+      where: { id },
       data,
-      where,
     });
   }
 
-  // Usuń pacjenta
-  async deletePatient(where: Prisma.PatientWhereUniqueInput): Promise<Patient> {
+  // Usuwanie pacjenta po ID
+  remove(id: number) {
     return this.prisma.patient.delete({
-      where,
+      where: { id },
     });
   }
 }

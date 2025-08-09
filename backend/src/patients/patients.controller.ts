@@ -1,55 +1,38 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Delete,
-  Patch,
-  ParseIntPipe,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { PatientsService } from './patients.service';
-import { Patient as PatientModel, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
-@Controller('patients') // Wszystkie endpointy będą pod adresem /patients
+@Controller('patients') // Wszystkie adresy tutaj będą zaczynać się od /patients
 export class PatientsController {
   constructor(private readonly patientsService: PatientsService) {}
 
-  // POST /patients - stwórz pacjenta
+  // POST /patients
   @Post()
-  async createPatient(
-    @Body() patientData: Prisma.PatientCreateInput,
-  ): Promise<PatientModel> {
-    return this.patientsService.createPatient(patientData);
+  create(@Body() createPatientDto: Prisma.PatientCreateInput) {
+    return this.patientsService.create(createPatientDto);
   }
 
-  // GET /patients - pobierz wszystkich pacjentów
+  // GET /patients
   @Get()
-  async getAllPatients(): Promise<PatientModel[]> {
-    return this.patientsService.getAllPatients();
+  findAll() {
+    return this.patientsService.findAll();
   }
 
-  // GET /patients/:id - pobierz jednego pacjenta
+  // GET /patients/:id
   @Get(':id')
-  async getPatientById(@Param('id', ParseIntPipe) id: number): Promise<PatientModel | null>  {
-    return this.patientsService.getPatientById({ id });
+  findOne(@Param('id') id: string) {
+    return this.patientsService.findOne(+id); // '+' konwertuje string na number
   }
 
-  // PATCH /patients/:id - zaktualizuj pacjenta
+  // PATCH /patients/:id  (PATCH jest lepsze do aktualizacji niż PUT)
   @Patch(':id')
-  async updatePatient(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() patientData: Prisma.PatientUpdateInput,
-  ): Promise<PatientModel> {
-    return this.patientsService.updatePatient({
-      where: { id },
-      data: patientData,
-    });
+  update(@Param('id') id: string, @Body() updatePatientDto: Prisma.PatientUpdateInput) {
+    return this.patientsService.update(+id, updatePatientDto);
   }
 
-  // DELETE /patients/:id - usuń pacjenta
+  // DELETE /patients/:id
   @Delete(':id')
-  async deletePatient(@Param('id', ParseIntPipe) id: number): Promise<PatientModel> {
-    return this.patientsService.deletePatient({ id });
+  remove(@Param('id') id: string) {
+    return this.patientsService.remove(+id);
   }
 }

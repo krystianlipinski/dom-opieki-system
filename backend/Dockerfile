@@ -1,20 +1,19 @@
-# Używamy oficjalnego obrazu Node.js jako bazy
 FROM node:18-alpine
 
-# Ustawiamy katalog roboczy w kontenerze
+RUN apk add --no-cache openssl
+
 WORKDIR /usr/src/app
 
-# Kopiujemy plik package.json i package-lock.json (jeśli istnieje)
+# Kopiujemy OBA pliki - package.json i package-lock.json
 COPY package*.json ./
 
-# Instalujemy zależności
-RUN npm install
+# Używamy komendy 'npm ci', która jest szybsza i bardziej niezawodna dla Dockera
+RUN npm ci
 
-# Kopiujemy cały kod aplikacji
 COPY . .
 
-# Ustawiamy port, na którym aplikacja będzie nasłuchiwać
+RUN npx prisma generate
+
 EXPOSE 3000
 
-# Uruchamiamy aplikację
-CMD ["npm", "run", "start:dev"]
+CMD [ "npm", "run", "start:dev" ]

@@ -1,18 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { User, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async createUser(data: Prisma.UserCreateInput): Promise<User> {
-    return this.prisma.user.create({
-      data,
+  // Ta funkcja była potrzebna dla logowania
+  async findOneByEmail(email: string) {
+    return this.prisma.user.findUnique({
+      where: { email },
     });
   }
 
-  async users(): Promise<User[]> {
+  // DODAJEMY TĘ FUNKCJĘ do listowania użytkowników
+  async findAll() {
     return this.prisma.user.findMany();
+  }
+
+  // Ta funkcja jest potrzebna dla kontrolera
+  async createUser(data: Prisma.UserCreateInput) {
+    return this.prisma.user.create({ data });
   }
 }
