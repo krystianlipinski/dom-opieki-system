@@ -13,7 +13,7 @@ import { ActivitiesModule } from './activities/activities.module';
     AuthModule,
     UsersModule,
     PatientsModule,
-    ActivitiesModule, // <-- To jest brakujący import
+    ActivitiesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
