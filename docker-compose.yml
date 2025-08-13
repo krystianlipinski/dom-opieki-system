@@ -19,18 +19,13 @@ services:
     container_name: domopieki_backend
     depends_on:
       - db
-    dns: # <-- DODANA SEKCJA DNS
-      - 8.8.8.8
-      - 1.1.1.1
     ports:
       - "3000:3000"
     volumes:
-      # Montujemy kod, ale izolujemy node_modules
       - ./backend:/usr/src/app
       - /usr/src/app/node_modules
     env_file:
       - .env
-    # command: tail -f /dev/null
 
   frontend:
     build:
@@ -40,7 +35,6 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      # Montujemy kod, ale izolujemy node_modules
       - ./frontend:/app
       - /app/node_modules
     env_file:

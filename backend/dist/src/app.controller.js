@@ -8,81 +8,19 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppController = void 0;
-const app_service_1 = require("./app.service");
 const common_1 = require("@nestjs/common");
+const app_service_1 = require("./app.service");
 let AppController = class AppController {
     appService;
     constructor(appService) {
         this.appService = appService;
     }
-    getAllPatients() {
-        return this.appService.getAllPatients();
-    }
-    createPatient(patientData) {
-        return this.appService.createPatient(patientData);
-    }
-    getAllActivities() {
-        return this.appService.getAllActivities();
-    }
-    createActivity(activityData) {
-        return this.appService.createActivity(activityData);
-    }
-    deletePatient(id) {
-        return this.appService.deletePatient(parseInt(id, 10));
-    }
-    updatePatient(id, patientData) {
-        return this.appService.updatePatient(parseInt(id, 10), patientData);
-    }
 };
 exports.AppController = AppController;
-__decorate([
-    (0, common_1.Get)('patients'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], AppController.prototype, "getAllPatients", null);
-__decorate([
-    (0, common_1.Post)('patients'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], AppController.prototype, "createPatient", null);
-__decorate([
-    (0, common_1.Get)('activities'),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
-], AppController.prototype, "getAllActivities", null);
-__decorate([
-    (0, common_1.Post)('activities'),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], AppController.prototype, "createActivity", null);
-__decorate([
-    (0, common_1.Delete)('patients/:id'),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], AppController.prototype, "deletePatient", null);
-__decorate([
-    (0, common_1.Put)('patients/:id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", void 0)
-], AppController.prototype, "updatePatient", null);
 exports.AppController = AppController = __decorate([
-    (0, common_1.Controller)('api'),
+    (0, common_1.Controller)(),
     __metadata("design:paramtypes", [app_service_1.AppService])
 ], AppController);
 //# sourceMappingURL=app.controller.js.map

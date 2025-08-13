@@ -1,133 +1,41 @@
-// This tells Prisma how to generate the client for your application.
 generator client {
   provider      = "prisma-client-js"
-  // This line is crucial for Docker compatibility on Alpine Linux
-  binaryTargets = ["native", "linux-musl"] 
+  binaryTargets = ["native", "linux-musl"]
 }
 
-// This tells Prisma how to connect to your database.
-// It reads the DATABASE_URL variable from your .env file.
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// === MODEL DEFINITIONS (your database tables) ===
-
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
   password  String
-  firstName String? // The '?' means this field is optional
+  firstName String?
   lastName  String?
   role      Role     @default(staff_care)
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 
-  // Relations
-  createdFamilyAccess PatientFamilyAccess[]
-  tasksCompleted      Task[]                @relation("CompletedTasks")
-  inventoryMovements  InventoryMovement[]
+  tasksCompleted Patient[] @relation("CompletedTasks")
 }
 
 model Patient {
-  id           Int        @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   firstName    String
   lastName     String
-  birthDate    DateTime?
-  carePriority Priority   @default(medium)
-  createdAt    DateTime   @default(now())
+  carePriority Priority @default(medium)
+  createdAt    DateTime @default(now())
 
-  // Relations
-  familyAccess PatientFamilyAccess[]
-  tasks        Task[]
-}
-
-// This is a many-to-many join table between Patient and User (for family access)
-model PatientFamilyAccess {
-  patientId Int
-  userId    Int
-
-  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([patientId, userId]) // Composite primary key
-}
-
-model CatalogActivity {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  defaultCost Decimal  @default(0)
-
-  // Relations
-  tasks Task[]
-}
-
-model CatalogProduct {
-  id      Int     @id @default(autoincrement())
-  name    String  @unique
-  barcode String? @unique
-  unit    String // e.g., 'szt', 'ml', 'op.'
-
-  // Relations
-  inventory          Inventory?
-  inventoryMovements InventoryMovement[]
-}
-
-// One-to-one relation with CatalogProduct
-model Inventory {
-  id                 Int @id @default(autoincrement())
-  quantity           Int @default(0)
-  lowStockThreshold  Int @default(0)
-
-  // Relations
-  product   CatalogProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId Int            @unique
-}
-
-model InventoryMovement {
-  id             Int          @id @default(autoincrement())
-  quantityChange Int
-  costPerUnit    Decimal?
-  type           MovementType
-  timestamp      DateTime     @default(now())
-
-  // Relations
-  product   CatalogProduct @relation(fields: [productId], references: [id], onDelete: Restrict)
-  productId Int
-  user      User           @relation(fields: [userId], references: [id], onDelete: Restrict)
-  userId    Int
-  task      Task?          @relation(fields: [taskId], references: [id], onDelete: SetNull)
-  taskId    Int?
-}
-
-model Task {
-  id                Int              @id @default(autoincrement())
-  type              TaskType
-  status            TaskStatus       @default(pending)
-  dueDate           DateTime
-  completedAt       DateTime?
-  completionNotes   String?
-  cost              Decimal?
-
-  // Relations
-  patient           Patient?         @relation(fields: [patientId], references: [id], onDelete: SetNull)
-  patientId         Int?
-  activity          CatalogActivity? @relation(fields: [activityId], references: [id], onDelete: SetNull)
-  activityId        Int?
-  completedBy       User?            @relation("CompletedTasks", fields: [completedByUserId], references: [id], onDelete: SetNull)
+  completedBy       User?    @relation("CompletedTasks", fields: [completedByUserId], references: [id])
   completedByUserId Int?
-
-  inventoryMovements InventoryMovement[]
 }
-
-// === ENUMS (pre-defined types for specific fields) ===
 
 enum Role {
   admin
   staff_care
   staff_doctor
-  staff_rehab
   family
 }
 
@@ -135,21 +43,4 @@ enum Priority {
   high
   medium
   low
-}
-
-enum MovementType {
-  income
-  outcome
-  correction
-}
-
-enum TaskType {
-  scheduled
-  ad_hoc
-}
-
-enum TaskStatus {
-  pending
-  completed
-  cancelled
 }

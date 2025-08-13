@@ -1,17 +1,18 @@
 FROM node:18-alpine
 
+# Instalujemy pakiet systemowy, którego wymaga Prisma
 RUN apk add --no-cache openssl
 
 WORKDIR /usr/src/app
 
-# Kopiujemy OBA pliki - package.json i package-lock.json
 COPY package*.json ./
 
-# Używamy komendy 'npm ci', która jest szybsza i bardziej niezawodna dla Dockera
-RUN npm ci
+# Czysta, standardowa instalacja
+RUN npm install
 
 COPY . .
 
+# Generowanie klienta Prisma jako część budowania obrazu
 RUN npx prisma generate
 
 EXPOSE 3000

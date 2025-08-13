@@ -5,9 +5,16 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PatientsModule } from './patients/patients.module';
+import { ActivitiesModule } from './activities/activities.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, UsersModule, PatientsModule],
+  imports: [
+    PrismaModule,
+    AuthModule,
+    UsersModule,
+    PatientsModule,
+    ActivitiesModule, // <-- To jest brakujący import
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

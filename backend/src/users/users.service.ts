@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UsersService {
@@ -13,13 +14,19 @@ export class UsersService {
     });
   }
 
-  // DODAJEMY TĘ FUNKCJĘ do listowania użytkowników
+  // Ta funkcja była brakująca
   async findAll() {
     return this.prisma.user.findMany();
   }
 
-  // Ta funkcja jest potrzebna dla kontrolera
+  // Ta funkcja też była brakująca (i od razu hashuje hasło)
   async createUser(data: Prisma.UserCreateInput) {
-    return this.prisma.user.create({ data });
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    return this.prisma.user.create({
+      data: {
+        ...data,
+        password: hashedPassword,
+      },
+    });
   }
 }

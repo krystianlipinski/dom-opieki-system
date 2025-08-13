@@ -21,13 +21,10 @@ let LocalStrategy = class LocalStrategy extends (0, passport_1.PassportStrategy)
         this.authService = authService;
     }
     async validate(username, password) {
-        console.log(`--- PRÓBA WALIDACJI DLA: ${username} ---`);
         const user = await this.authService.validateUser(username, password);
         if (!user) {
-            console.log(`--- WALIDACJA NIEUDANA DLA: ${username} ---`);
             throw new common_1.UnauthorizedException();
         }
-        console.log(`--- WALIDACJA POMYŚLNA DLA: ${username} ---`);
         return user;
     }
 };

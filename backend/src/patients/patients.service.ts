@@ -6,33 +6,22 @@ import { Prisma } from '@prisma/client';
 export class PatientsService {
   constructor(private prisma: PrismaService) {}
 
-  // Tworzenie pacjenta
-  create(data: Prisma.PatientCreateInput) {
-    return this.prisma.patient.create({ data });
+  async create(data: Prisma.PatientCreateInput) {
+    console.log('--- [PatientsService] Attempting to create patient ---');
+    const patient = await this.prisma.patient.create({ data });
+    console.log('--- [PatientsService] Patient created successfully ---');
+    return patient;
   }
 
-  // Pobieranie wszystkich pacjentów
-  findAll() {
-    return this.prisma.patient.findMany();
-  }
-
-  // Pobieranie jednego pacjenta po ID
-  findOne(id: number) {
-    return this.prisma.patient.findUnique({ where: { id } });
-  }
-
-  // Aktualizacja pacjenta po ID
-  update(id: number, data: Prisma.PatientUpdateInput) {
-    return this.prisma.patient.update({
-      where: { id },
-      data,
-    });
-  }
-
-  // Usuwanie pacjenta po ID
-  remove(id: number) {
-    return this.prisma.patient.delete({
-      where: { id },
-    });
+  async findAll() {
+    console.log('--- [PatientsService] Attempting to find all patients... ---');
+    try {
+      const patients = await this.prisma.patient.findMany();
+      console.log(`--- [PatientsService] Found ${patients.length} patients. ---`);
+      return patients;
+    } catch (error) {
+      console.error('--- [PatientsService] ERROR while fetching patients ---', error);
+      throw error;
+    }
   }
 }

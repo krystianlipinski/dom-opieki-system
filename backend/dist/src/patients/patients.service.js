@@ -17,25 +17,23 @@ let PatientsService = class PatientsService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    create(data) {
-        return this.prisma.patient.create({ data });
+    async create(data) {
+        console.log('--- [PatientsService] Attempting to create patient ---');
+        const patient = await this.prisma.patient.create({ data });
+        console.log('--- [PatientsService] Patient created successfully ---');
+        return patient;
     }
-    findAll() {
-        return this.prisma.patient.findMany();
-    }
-    findOne(id) {
-        return this.prisma.patient.findUnique({ where: { id } });
-    }
-    update(id, data) {
-        return this.prisma.patient.update({
-            where: { id },
-            data,
-        });
-    }
-    remove(id) {
-        return this.prisma.patient.delete({
-            where: { id },
-        });
+    async findAll() {
+        console.log('--- [PatientsService] Attempting to find all patients... ---');
+        try {
+            const patients = await this.prisma.patient.findMany();
+            console.log(`--- [PatientsService] Found ${patients.length} patients. ---`);
+            return patients;
+        }
+        catch (error) {
+            console.error('--- [PatientsService] ERROR while fetching patients ---', error);
+            throw error;
+        }
     }
 };
 exports.PatientsService = PatientsService;
